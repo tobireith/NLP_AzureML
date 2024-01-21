@@ -17,6 +17,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, MinMaxScaler
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.base import clone
 from sklearn.compose import make_column_transformer, make_column_selector
 from sklearn.pipeline import make_pipeline
@@ -99,11 +100,9 @@ def process_data(df):
 
 def train_model(params, X_train, X_test, y_train, y_test):
     # train model
-    # TODO: Rework this, OneHot is not good for so many different Texts!
     column_transformer=make_column_transformer(
             (make_pipeline(
-                SimpleImputer(strategy='most_frequent'),
-                OneHotEncoder(sparse=False)
+                TfidfVectorizer(max_features=1000, min_df=0.02, max_df=0.95)
             ), make_column_selector(dtype_include='category')),
             (make_pipeline(
                 SimpleImputer(strategy='median'),

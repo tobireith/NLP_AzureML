@@ -38,10 +38,10 @@ for filename in os.listdir(args.input_data):
 # Concatenate the list of Python DataFrames
 df=pd.concat(file_list)
 
-# We need to find and replace missing values for police district
-# If a value is missing, replace it with 0.
-print("Replacing missing police districts...")
-df['Police_District'].fillna(0, inplace=True)
+# We need to find and remove missing values
+# If a value is missing, remove it.
+print("Removing rows with some missing data...")
+df.dropna(inplace=True)
 
 # Write the results out for the next step.
 print("Writing results out...")

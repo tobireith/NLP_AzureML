@@ -39,7 +39,8 @@ for filename in os.listdir(args.input_data):
 df=pd.concat(file_list)
 
 # Feature selection
-df.drop(['Tract', 'Hardship_Index', 'Issued_date', 'License_Plate_State', 'Plate_Type'], axis=1, inplace=True)
+# Drop all other features than 'Score' and 'Text'
+df.drop(['Id', 'ProductId', 'UserId', 'ProfileName', 'HelpfulnessNumerator', 'HelpfulnessDenominator', 'Time', 'Summary'], axis=1, inplace=True)
 
 # Write the results out for the next step.
 print("Writing results out...")

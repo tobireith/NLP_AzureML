@@ -53,7 +53,7 @@ def main(args):
     X_train, y_train=process_data(train_df)
     X_test, y_test=process_data(test_df)
 
-    # train model
+    # train model: Gradient Boosted Decision Trees
     params={
         'max_leaf_nodes': args.max_leaf_nodes,
         'min_samples_leaf': args.min_samples_leaf,
@@ -74,12 +74,9 @@ def main(args):
         json.dump(results, fp)
     
 def process_data(df):
-    numerical=['Per_capita_income', 'Percent_unemployed', 'Percent_without_diploma',
-                 'Percent_households_below_poverty', 'Ward', 'ZIP', 'Police_District',
-                 'Unit_ID', 'Violation_ID', 'Issued_year']
-    categorical=['Time_of_day', 'License_plate_origin', 'Vehicle_type', 'Community_Name',
-                   'Sector', 'Side', 'Neighborhood']
-    label_column="PaymentIsOutstanding"
+    numerical=[]
+    categorical=['Text']
+    label_column="Score"
     all_columns=numerical + categorical + [label_column]
     
     df=df[all_columns]
@@ -102,6 +99,7 @@ def process_data(df):
 
 def train_model(params, X_train, X_test, y_train, y_test):
     # train model
+    # TODO: Rework this, OneHot is not good for so many different Texts!
     column_transformer=make_column_transformer(
             (make_pipeline(
                 SimpleImputer(strategy='most_frequent'),

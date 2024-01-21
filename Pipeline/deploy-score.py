@@ -32,10 +32,10 @@ from azure.ai.ml.sweep import (
 )
 
 # NOTE:  set your workspace name here!
-workspace_name="CSAzureML"
-# NOTE:  if you do not have a cpu-cluster already, we will create one
+workspace_name="treithmaier-amls-01"
+# NOTE:  if you do not have a compute instance already, we will create one
 # Alternatively, change the name to a CPU-based compute cluster
-cluster_name="cpu-cluster"
+compute_name="treithmaier-vm01"
 
 # NOTE:  for local runs, I'm using the Azure CLI credential
 # For production runs as part of an MLOps configuration using
@@ -46,9 +46,9 @@ ws=ml_client.workspaces.get(workspace_name)
 
 # Make sure the compute cluster exists already
 try:
-    cpu_cluster=ml_client.compute.get(cluster_name)
+    compute_instance=ml_client.compute.get(compute_name)
     print(
-        f"You already have a cluster named {cluster_name}, we'll reuse it as is."
+        f"You already have a compute instance named {compute_name}, we'll reuse it as is."
     )
 
 except Exception:
@@ -58,42 +58,38 @@ except Exception:
     # if you run into an out of quota error, change the size to a comparable VM that is available.\
     # Learn more on https://azure.microsoft.com/en-us/pricing/details/machine-learning/.
 
-    cpu_cluster=AmlCompute(
-        name=cluster_name,
+    compute_instance=AmlCompute(
+        name=compute_name,
         # Azure Machine Learning Compute is the on-demand VM service
         type="amlcompute",
         # VM Family
-        size="STANDARD_DS3_V2",
-        # Minimum running nodes when there is no job running
-        min_instances=0,
-        # Nodes in cluster
-        max_instances=4,
+        size="Standard_E2a_v4",
         # How many seconds will the node running after the job termination
         idle_time_before_scale_down=180,
         # Dedicated or LowPriority. The latter is cheaper but there is a chance of job termination
         tier="Dedicated",
     )
     print(
-        f"AMLCompute with name {cpu_cluster.name} will be created, with compute size {cpu_cluster.size}"
+        f"AMLCompute with name {compute_instance.name} will be created, with compute size {compute_instance.size}"
     )
     # Now, we pass the object to MLClient's create_or_update method
-    cpu_cluster=ml_client.compute.begin_create_or_update(cpu_cluster)
+    cpu_compute_instancecluster=ml_client.compute.begin_create_or_update(compute_instance)
 
 
 # Ensure that there is an endpoint for batch scoring
-endpoint_name="chicago-parking-tickets-batch"
+endpoint_name="amazon-fine-food-batch"
 try:
     endpoint=ml_client.batch_endpoints.get(endpoint_name)
     print(f"You already have an endpoint named {endpoint_name}, we'll reuse it as is.")
 except Exception:
     print("Creating a new batch endpoint")
-    endpoint=BatchEndpoint(name=endpoint_name, description="Batch scoring endpoint for Chicago Parking Ticket payment status")
+    endpoint=BatchEndpoint(name=endpoint_name, description="Batch scoring endpoint for Amazon Fine Food Reviews score (1-5)")
     ml_client.batch_endpoints.begin_create_or_update(endpoint).result()
     endpoint=ml_client.batch_endpoints.get(endpoint_name)
     print(f"Endpoint name:  {endpoint.name}")
 
-# Retrieve the parking tickets model
-model=ml_client.models.get(name="ChicagoParkingTicketsCodeFirst", version="1")
+# Retrieve the previously trained model
+model=ml_client.models.get(name="AmazonFineFoodScoreBoostedTree", version="1")
 print("Retrieved model.")
 
 # Get the correct environment
@@ -106,12 +102,12 @@ except Exception:
     environment=ml_client.environments.get(name="AzureML-sklearn-1.0-ubuntu20.04-py38-cpu", version="33")
     deployment=ModelBatchDeployment(
         name="cpt-batch-deployment",
-        description="Batch scoring of Chicago Parking Ticket payment status",
+        description="Batch scoring for Amazon Fine Food Reviews score (1-5)",
         endpoint_name=endpoint.name,
         model=model,
         environment=environment,
         code_configuration=CodeConfiguration(code="scripts", scoring_script="score_model.py"),
-        compute=cluster_name,
+        compute=compute_name,
         settings=ModelBatchDeploymentSettings(
             instance_count=2,
             max_concurrency_per_instance=2,
@@ -131,6 +127,7 @@ except Exception:
 
 # Prepare the dataset
 data_path="data"
+# TODO
 dataset_name="ChicagoParkingTicketsUnlabeled"
 try:
     chicago_dataset_unlabeled=ml_client.data.get(dataset_name, label="latest")
@@ -140,7 +137,7 @@ except Exception:
     chicago_dataset_unlabeled=Data(
         path=data_path,
         type=AssetTypes.URI_FOLDER,
-        description="An unlabeled dataset for Chicago parking ticket payment status",
+        description="An unlabeled dataset for for Amazon Fine Food Reviews score",
         name=dataset_name
     )
     ml_client.data.create_or_update(chicago_dataset_unlabeled)

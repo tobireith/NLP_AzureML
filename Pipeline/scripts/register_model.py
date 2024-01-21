@@ -42,8 +42,8 @@ os.makedirs(root_model_path, exist_ok=True)
 mlflow.sklearn.save_model(model, root_model_path)
 
 print("Registering the models...")
-registered_model_name="ChicagoParkingTicketsCodeFirst"
-model_description="Chicago Parking Tickets Boosted Tree Predictor - Code First Model"
+registered_model_name="AmazonFineFoodScoreBoostedTree"
+model_description="Amazon Fine Food Reviews Score Boosted Tree Predictor"
 
 registered_model=Model.register(model_path=root_model_path, 
                                   model_name=registered_model_name, 

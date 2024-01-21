@@ -42,8 +42,7 @@ for filename in os.listdir(args.input_data):
 df=pd.concat(file_list)
 
 # We will have a relatively smaller test dataset size
-# but this is still ~200k rows and we're going to use some
-# of the data for hyperparameter sweeps
+# we're going to use some of the data for hyperparameter sweeps
 train_df, test_df=train_test_split(df, test_size=0.2, random_state=11084)
 
 # Write the results out for the next step.

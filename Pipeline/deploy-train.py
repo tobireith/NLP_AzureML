@@ -22,10 +22,10 @@ from azure.ai.ml.sweep import (
 )
 
 # NOTE:  set your workspace name here!
-workspace_name="CSAzureML"
-# NOTE:  if you do not have a cpu-cluster already, we will create one
+workspace_name="treithmaier-amls-01"
+# NOTE:  if you do not have a compute instance already, we will create one
 # Alternatively, change the name to a CPU-based compute cluster
-cluster_name="cpu-cluster"
+compute_name="treithmaier-vm01"
 
 # NOTE:  for local runs, I'm using the Azure CLI credential
 # For production runs as part of an MLOps configuration using
@@ -36,9 +36,9 @@ ws=ml_client.workspaces.get(workspace_name)
 
 # Make sure the compute cluster exists already
 try:
-    cpu_cluster=ml_client.compute.get(cluster_name)
+    compute_instance=ml_client.compute.get(compute_name)
     print(
-        f"You already have a cluster named {cluster_name}, we'll reuse it as is."
+        f"You already have a compute instance named {compute_name}, we'll reuse it as is."
     )
 
 except Exception:
@@ -48,26 +48,22 @@ except Exception:
     # if you run into an out of quota error, change the size to a comparable VM that is available.\
     # Learn more on https://azure.microsoft.com/en-us/pricing/details/machine-learning/.
 
-    cpu_cluster=AmlCompute(
-        name=cluster_name,
+    compute_instance=AmlCompute(
+        name=compute_name,
         # Azure Machine Learning Compute is the on-demand VM service
         type="amlcompute",
         # VM Family
-        size="STANDARD_DS3_V2",
-        # Minimum running nodes when there is no job running
-        min_instances=0,
-        # Nodes in cluster
-        max_instances=4,
+        size="Standard_E2a_v4",
         # How many seconds will the node running after the job termination
         idle_time_before_scale_down=180,
         # Dedicated or LowPriority. The latter is cheaper but there is a chance of job termination
         tier="Dedicated",
     )
     print(
-        f"AMLCompute with name {cpu_cluster.name} will be created, with compute size {cpu_cluster.size}"
+        f"AMLCompute with name {compute_instance.name} will be created, with compute size {compute_instance.size}"
     )
     # Now, we pass the object to MLClient's create_or_update method
-    cpu_cluster=ml_client.compute.begin_create_or_update(cpu_cluster)
+    cpu_compute_instancecluster=ml_client.compute.begin_create_or_update(compute_instance)
 
 parent_dir="./config"
 # Perform data preparation
@@ -99,20 +95,21 @@ def build_pipeline(raw_data):
     return { "model": train_model_data.outputs.model_output,
              "report": train_model_data.outputs.test_report }
 
-def prepare_pipeline_job(cluster_name):
+def prepare_pipeline_job(compute_name):
     # must have a dataset already in place
-    cpt_asset=ml_client.data.get(name="ChicagoParkingTicketsFolder", version="1")
+    cpt_asset = ml_client.data.get("amazon_fine_food_reviews_05", version="1")
     raw_data=Input(type='uri_folder', path=cpt_asset.path)
     pipeline_job=build_pipeline(raw_data)
     # set pipeline level compute
-    pipeline_job.settings.default_compute=cluster_name
+    pipeline_job.settings.default_compute=compute_name
     # set pipeline level datastore
     pipeline_job.settings.default_datastore="workspaceblobstore"
+    # TODO: Maybe don't set this to True?
     pipeline_job.settings.force_rerun=True
     pipeline_job.display_name="train_pipeline"
     return pipeline_job
 
-prepped_job=prepare_pipeline_job(cluster_name)
-ml_client.jobs.create_or_update(prepped_job, experiment_name="Chicago Parking Tickets Code-First")
+prepped_job=prepare_pipeline_job(compute_name)
+ml_client.jobs.create_or_update(prepped_job, experiment_name="NLP_Sentiment_Analysis_Coded_Amazon_Fine_Food")
 
-print("Now look in the Azure ML Jobs UI to see the status of the pipeline job.  This will be in the 'Chicago Parking Tickets Code-First' experiment.")
+print("Now look in the Azure ML Jobs UI to see the status of the pipeline job.  This will be in the 'NLP_Sentiment_Analysis_Coded_Amazon_Fine_Food' experiment.")

@@ -34,7 +34,7 @@ compute_name="treithmaier-vm01"
 ml_client=MLClient.from_config(AzureCliCredential())
 ws=ml_client.workspaces.get(workspace_name)
 
-# Make sure the compute cluster exists already
+# Make sure the compute ressource exists already
 try:
     compute_instance=ml_client.compute.get(compute_name)
     print(
@@ -67,22 +67,18 @@ except Exception:
 
 parent_dir="./config"
 # Perform data preparation
-# NOTE:  I would actually combine the feature-* and split-data steps together
-# but have left them separate to show an example of multi-step pipelines
 # NOTE:  Older versions of the AML SDK required 'path' instead of 'source' for the load_component() calls below.
-replace_missing_values=load_component(source=os.path.join(parent_dir, "feature-replace-missing-values.yml"))
 feature_engineering=load_component(source=os.path.join(parent_dir, "feature-engineering.yml"))
-feature_selection=load_component(source=os.path.join(parent_dir, "feature-selection.yml"))
+feature_text_preprocessing=load_component(source=os.path.join(parent_dir, "feature-text-preprocessing.yml"))
 split_data=load_component(source=os.path.join(parent_dir, "split-data.yml"))
 train_model=load_component(source=os.path.join(parent_dir, "train-model.yml"))
 register_model=load_component(source=os.path.join(parent_dir, "register-model.yml"))
 
 @pipeline(name="training_pipeline", description="Build a training pipeline")
 def build_pipeline(raw_data):
-    step_replace_missing_values=replace_missing_values(input_data=raw_data)
-    step_feature_engineering=feature_engineering(input_data=step_replace_missing_values.outputs.output_data)
-    step_feature_selection=feature_selection(input_data=step_feature_engineering.outputs.output_data)
-    step_split_data=split_data(input_data=step_feature_selection.outputs.output_data)
+    step_feature_engineering=feature_engineering(input_data=raw_data)
+    step_feature_text_preprocessing=feature_text_preprocessing(input_data=step_feature_engineering.outputs.output_data)
+    step_split_data=split_data(input_data=step_feature_text_preprocessing.outputs.output_data)
 
     train_model_data=train_model(train_data=step_split_data.outputs.output_data_train,
                                    test_data=step_split_data.outputs.output_data_test,

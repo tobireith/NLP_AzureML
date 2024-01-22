@@ -40,6 +40,13 @@ df=pd.concat(file_list)
 
 # Feature engineering steps
 
+# Remove missing values
+df.dropna(inplace=True)
+
+# Feature Selection
+# Drop all other features than 'Score' and 'Text'
+df.drop(['Id', 'ProductId', 'UserId', 'ProfileName', 'HelpfulnessNumerator', 'HelpfulnessDenominator', 'Time', 'Summary'], axis=1, inplace=True)
+
 # Write the results out for the next step.
 print("Writing results out...")
 df.to_csv((Path(args.output_data) / "FeatureEngineering.csv"), index=False)

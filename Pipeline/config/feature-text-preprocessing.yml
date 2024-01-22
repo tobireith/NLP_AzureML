@@ -1,6 +1,6 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
-name: feature_selection
-display_name: Feature Selection
+name: feature_text_preprocessing
+display_name: Text Preprocessing
 version: 1
 type: command
 inputs:
@@ -12,6 +12,6 @@ outputs:
 code: ../scripts
 environment: azureml://registries/azureml/environments/lightgbm-3.3/versions/2
 command: >-
-  python feature_selection.py 
+  python feature_text_preprocessing.py 
   --input_data ${{inputs.input_data}}
   --output_data ${{outputs.output_data}}

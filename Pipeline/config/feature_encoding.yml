@@ -1,0 +1,23 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: feature_encoding
+display_name: Feature Encoding
+version: 1
+type: command
+inputs:
+  input_data_train: 
+    type: uri_folder
+  input_data_test: 
+    type: uri_folder
+outputs:
+  output_data_train:
+    type: uri_folder
+  output_data_test:
+    type: uri_folder
+code: ../scripts
+environment: azureml://registries/azureml/environments/lightgbm-3.3/versions/2
+command: >-
+  python feature_encoding.py 
+  --input_data_train ${{inputs.input_data_train}}
+  --input_data_test ${{inputs.input_data_test}}
+  --output_data_train ${{outputs.output_data_train}}
+  --output_data_test ${{outputs.output_data_test}}

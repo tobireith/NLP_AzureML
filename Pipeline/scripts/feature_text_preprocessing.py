@@ -84,7 +84,9 @@ def preprocess_text(sen):
         if word not in stop_words
         and tag in important_tags
     ]
-    return filtered_tokens
+
+    processed_sentence = ' '.join(filtered_tokens)
+    return processed_sentence
 
 # Now apply preprocess_text to all rows in the 'Text' column
 # and save the processed text back into the 'Text' column

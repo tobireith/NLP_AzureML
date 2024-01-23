@@ -71,6 +71,7 @@ parent_dir="./config"
 feature_engineering=load_component(source=os.path.join(parent_dir, "feature-engineering.yml"))
 feature_text_preprocessing=load_component(source=os.path.join(parent_dir, "feature-text-preprocessing.yml"))
 split_data=load_component(source=os.path.join(parent_dir, "split-data.yml"))
+feature_encoding=load_component(source=os.path.join(parent_dir, "feature-encoding.yml"))
 train_model=load_component(source=os.path.join(parent_dir, "train-model.yml"))
 register_model=load_component(source=os.path.join(parent_dir, "register-model.yml"))
 
@@ -79,9 +80,11 @@ def build_pipeline(raw_data):
     step_feature_engineering=feature_engineering(input_data=raw_data)
     step_feature_text_preprocessing=feature_text_preprocessing(input_data=step_feature_engineering.outputs.output_data)
     step_split_data=split_data(input_data=step_feature_text_preprocessing.outputs.output_data)
+    step_feature_encoding=feature_encoding(train_data=step_split_data.outputs.output_data_train,
+                                   test_data=step_split_data.outputs.output_data_test)
 
-    train_model_data=train_model(train_data=step_split_data.outputs.output_data_train,
-                                   test_data=step_split_data.outputs.output_data_test,
+    train_model_data=train_model(train_data=step_feature_encoding.outputs.output_data_train,
+                                   test_data=step_feature_encoding.outputs.output_data_test,
                                    max_leaf_nodes=128,
                                    min_samples_leaf=32,
                                    max_depth=12,

@@ -21,7 +21,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.base import clone
 from sklearn.compose import make_column_transformer, make_column_selector
 from sklearn.pipeline import make_pipeline
-from sklearn.metrics import accuracy_score, average_precision_score, f1_score, precision_score, recall_score, roc_auc_score
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
 
 import mlflow
 import mlflow.sklearn
@@ -75,24 +76,10 @@ def main(args):
         json.dump(results, fp)
     
 def process_data(df):
-    numerical=[]
-    categorical=['Text']
     label_column="Score"
-    all_columns=numerical + categorical + [label_column]
-    
-    df=df[all_columns]
-    
-    df=df[~df[label_column].isnull()]
-    print("Number of non-null label rows:", len(df))
         
     X=df.drop(label_column, axis=1)
     y=df[label_column]
-    
-    for col in categorical:
-        X[col]=X[col].astype('category')
-        
-    for col in numerical:
-        X[col]=X[col].astype('float64')
 
     # return split data
     return X, y
@@ -100,48 +87,14 @@ def process_data(df):
 
 def train_model(params, X_train, X_test, y_train, y_test):
     # train model
-    column_transformer=make_column_transformer(
-            (make_pipeline(
-                TfidfVectorizer(max_features=1000, min_df=0.02, max_df=0.95)
-            ), make_column_selector(dtype_include='category')),
-            (make_pipeline(
-                SimpleImputer(strategy='median'),
-                MinMaxScaler()
-            ), make_column_selector(dtype_exclude=['category']))
-        )
-
-    clf=GradientBoostingClassifier(**params)
-    model=make_pipeline(column_transformer, clf)
+    model=GradientBoostingClassifier(**params)
     model=model.fit(X_train, y_train)
     
     y_preds=model.predict(X_test)
 
-    accuracy=accuracy_score(y_test, y_preds)
-    f1=f1_score(y_test, y_preds)
-    f1_micro=f1_score(y_test, y_preds, average='micro')
-    f1_macro=f1_score(y_test, y_preds, average='macro')
-    precision=precision_score(y_test, y_preds)
-    recall=recall_score(y_test, y_preds)
-    roc_auc=roc_auc_score(y_test, y_preds)
-    
-    results={}
-    results["accuracy"]=accuracy
-    results["f1"]=f1
-    results["f1_micro"]=f1_micro
-    results["f1_macro"]=f1_macro
-    results["precision"]=precision
-    results["recall"]=recall
-    results["roc_auc"]=roc_auc
+    results = classification_report(y_test, y_preds, output_dict=True)
     
     print(results)
-    
-    mlflow.log_metric("accuracy", float(accuracy))
-    mlflow.log_metric("f1", float(f1))
-    mlflow.log_metric("f1_micro", float(f1_micro))
-    mlflow.log_metric("f1_macro", float(f1_macro))
-    mlflow.log_metric("precision", float(precision))
-    mlflow.log_metric("recall", float(recall))
-    mlflow.log_metric("roc_auc", float(roc_auc))
 
     # return model
     return model, results

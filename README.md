@@ -1,12 +1,12 @@
-# Getting Beyond the Basics with Azure Machine Learning
+# Natural Language Processing with Azure Machine Learning
 
-This repository provides the supporting code for my presentation entitled [Beyond the Basics with Azure ML](https://www.catallaxyservices.com/presentations/beyond-the-basics-with-azureml/).
+This repository is based on the code for the presentation entitled [Beyond the Basics with Azure ML](https://www.catallaxyservices.com/presentations/beyond-the-basics-with-azureml/) and is modified to meet my requirements.
 
 ## Generating Data
 
-This data comes from the [Chicago Parking Ticket database, courtesy of Daniel Hutmacher](https://sqlsunday.com/2022/12/05/new-demo-database/).  I sampled 1,000,000 records from it and [the file I used is available in CSV format](https://cspolybasepublic.blob.core.windows.net/cstrainingpublicdata/ChicagoParkingTickets.txt).
+This data comes from the [Amazon Fine Food Reviews dataset from kaggle](https://www.kaggle.com/datasets/snap/amazon-fine-food-reviews).  It includes ~500.000 food reviews from Amazon.
 
-Import this into Azure ML using the Dataset name `ChicagoParkingTicketsFolder`.  Be sure to upload this as a `uri_folder` instead of an `MLtable` or `uri_file`!
+Import this into Azure ML using the Dataset name `amazon_fine_food_reviews_05`.  Be sure to upload this as a `uri_folder` instead of an `MLtable` or `uri_file`!
 
 ## Running the Code
 
@@ -49,7 +49,7 @@ From there, run the training code:
 python deploy-train.py
 ```
 
-You can see the job in action by going to [Azure ML Studio](https://ml.azure.com) and viewing the "Chicago_Parking_Tickets_Code-First" experiment.  There will be a new "train_pipeline" job.
+You can see the job in action by going to [Azure ML Studio](https://ml.azure.com) and viewing the "NLP_Sentiment_Analysis_Coded_Amazon_Fine_Food" experiment.  There will be a new "train_pipeline" job.
 
 For scoring, run the following code:
 

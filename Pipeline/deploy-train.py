@@ -80,8 +80,8 @@ def build_pipeline(raw_data):
     step_feature_engineering=feature_engineering(input_data=raw_data)
     step_feature_text_preprocessing=feature_text_preprocessing(input_data=step_feature_engineering.outputs.output_data)
     step_split_data=split_data(input_data=step_feature_text_preprocessing.outputs.output_data)
-    step_feature_encoding=feature_encoding(train_data=step_split_data.outputs.output_data_train,
-                                   test_data=step_split_data.outputs.output_data_test)
+    step_feature_encoding=feature_encoding(input_data_train=step_split_data.outputs.output_data_train,
+                                   input_data_test=step_split_data.outputs.output_data_test)
 
     train_model_data=train_model(train_data=step_feature_encoding.outputs.output_data_train,
                                    test_data=step_feature_encoding.outputs.output_data_test,

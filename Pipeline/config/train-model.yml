@@ -24,7 +24,7 @@ outputs:
   test_report:
     type: uri_folder
 code: ../scripts
-environment: azureml://registries/azureml/environments/lightgbm-3.3/versions/2
+environment: azureml:NLP_ML@latest
 command: >-
   python train_model.py 
   --train_data ${{inputs.train_data}}

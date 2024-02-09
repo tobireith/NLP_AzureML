@@ -8,8 +8,6 @@ import mlflow.sklearn
 import sys
 import timeit
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 import nltk
 import re
 from nltk.corpus import stopwords

@@ -68,6 +68,7 @@ except Exception:
 parent_dir="./config"
 # Perform data preparation
 # NOTE:  Older versions of the AML SDK required 'path' instead of 'source' for the load_component() calls below.
+# Loading the component from the yml file
 feature_engineering=load_component(source=os.path.join(parent_dir, "feature-engineering.yml"))
 feature_text_preprocessing=load_component(source=os.path.join(parent_dir, "feature-text-preprocessing.yml"))
 split_data=load_component(source=os.path.join(parent_dir, "split-data.yml"))
@@ -90,6 +91,8 @@ def build_pipeline(raw_data):
                                    max_depth=12,
                                    learning_rate=0.1,
                                    n_estimators=100)
+    # If GPU-Compute Targets are needed, use train_model.compute = "gpu-cluster"
+
     register_model(model=train_model_data.outputs.model_output, test_report=train_model_data.outputs.test_report)
     return { "model": train_model_data.outputs.model_output,
              "report": train_model_data.outputs.test_report }
@@ -103,12 +106,12 @@ def prepare_pipeline_job(compute_name):
     pipeline_job.settings.default_compute=compute_name
     # set pipeline level datastore
     pipeline_job.settings.default_datastore="workspaceblobstore"
-    # TODO: Maybe don't set this to True?
-    pipeline_job.settings.force_rerun=True
+    pipeline_job.settings.force_rerun=False
     pipeline_job.display_name="train_pipeline"
     return pipeline_job
 
 prepped_job=prepare_pipeline_job(compute_name)
+# Register the components to the workspace
 ml_client.jobs.create_or_update(prepped_job, experiment_name="NLP_Sentiment_Analysis_Coded_Amazon_Fine_Food")
 
 print("Now look in the Azure ML Jobs UI to see the status of the pipeline job.  This will be in the 'NLP_Sentiment_Analysis_Coded_Amazon_Fine_Food' experiment.")

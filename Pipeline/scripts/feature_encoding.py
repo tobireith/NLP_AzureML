@@ -8,6 +8,7 @@ import mlflow.sklearn
 import sys
 import timeit
 import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 parser=argparse.ArgumentParser("prep")
@@ -60,20 +61,18 @@ X_test, y_test = X_y_split(test_df)
 
 # Set the parameters for TF-IDF Vectorization
 MAX_FEATURES = 1000
-MIN_DF = 0.02
-MAX_DF = 0.95
+MIN_DF = 0.01
+MAX_DF = 0.99
 NGRAM_RANGE = (1,3)
-
-from sklearn.feature_extraction.text import TfidfVectorizer
 
 # Create the TF-IDF-Vectorizer
 # Limit the features by using min and max df.
 vectorizer_tfidf = TfidfVectorizer(max_features=MAX_FEATURES, min_df=MIN_DF, max_df=MAX_DF)
 
 # Use fit_transform on the training data
-X_train_transformed = vectorizer_tfidf.fit_transform(X_train)
+X_train_transformed = vectorizer_tfidf.fit_transform(X_train['Text'])
 # transform the test data by using the Vectorizer
-X_test_transformed = vectorizer_tfidf.transform(X_test)
+X_test_transformed = vectorizer_tfidf.transform(X_test['Text'])
 
 # Converting the transformed Training- and Testdata into DataFrames
 train_df_transformed = pd.DataFrame(X_train_transformed.toarray(), columns=vectorizer_tfidf.get_feature_names_out())

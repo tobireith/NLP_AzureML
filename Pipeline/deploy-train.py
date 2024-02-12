@@ -10,7 +10,7 @@ from urllib.parse import urlencode
 
 import azure.ai.ml
 from azure.ai.ml import MLClient, Input, Output
-from azure.ai.ml.entities import Workspace, AmlCompute
+from azure.ai.ml.entities import Workspace, AmlCompute, Component
 from azure.identity import DefaultAzureCredential, InteractiveBrowserCredential, AzureCliCredential
 from azure.ai.ml.dsl import pipeline
 from azure.ai.ml import load_component
@@ -66,25 +66,51 @@ except Exception:
     cpu_compute_instancecluster=ml_client.compute.begin_create_or_update(compute_instance)
 
 parent_dir="./config"
-# Perform data preparation
-# NOTE:  Older versions of the AML SDK required 'path' instead of 'source' for the load_component() calls below.
-# Loading the component from the yml file
-feature_engineering=load_component(source=os.path.join(parent_dir, "feature-engineering.yml"))
-feature_text_preprocessing=load_component(source=os.path.join(parent_dir, "feature-text-preprocessing.yml"))
-split_data=load_component(source=os.path.join(parent_dir, "split-data.yml"))
-feature_encoding=load_component(source=os.path.join(parent_dir, "feature-encoding.yml"))
-train_model=load_component(source=os.path.join(parent_dir, "train-model.yml"))
-register_model=load_component(source=os.path.join(parent_dir, "register-model.yml"))
 
+def get_or_register_component(component_name, component_file_path):
+    """
+    Checks if a component exists in Azure ML and uploads it if not.
+    Returns the component.
+    """
+    try:
+        # Attempt to get the component. If it exists, no upload is needed.
+        component = ml_client.components.get(name=component_name, version="1")
+        print(f"Component {component_name} found in the registry.")
+    except Exception as e:
+        print(f"Component {component_name} not found. Uploading from {component_file_path}.")
+        # The component does not exist, so create and upload it from the corresponding .yml file.
+        component = ml_client.components.create_or_update(load_component(component_file_path))
+    return component
+
+# Define the names and paths of your components
+component_names_and_paths = {
+    "feature_engineering": "feature-engineering.yml",
+    "feature_text_preprocessing": "feature-text-preprocessing.yml",
+    "split_data": "split-data.yml",
+    "feature_encoding": "feature-encoding.yml",
+    "train_model": "train-model.yml",
+    "register_model": "register-model.yml"
+}
+
+# Iterate through your components and register or load them as needed
+components = {}
+for name, file_path in component_names_and_paths.items():
+    full_path = os.path.join(parent_dir, file_path)
+    components[name] = get_or_register_component(name, full_path)
+
+# Now you can use `components` to access the registered components,
+# e.g., `components['feature_engineering']` instead of `load_component(...)`.
+
+# Build the Pipeline with all the components
 @pipeline(name="training_pipeline", description="Build a training pipeline")
 def build_pipeline(raw_data):
-    step_feature_engineering=feature_engineering(input_data=raw_data)
-    step_feature_text_preprocessing=feature_text_preprocessing(input_data=step_feature_engineering.outputs.output_data)
-    step_split_data=split_data(input_data=step_feature_text_preprocessing.outputs.output_data)
-    step_feature_encoding=feature_encoding(input_data_train=step_split_data.outputs.output_data_train,
+    step_feature_engineering = components['feature_engineering'](input_data=raw_data)
+    step_feature_text_preprocessing = components['feature_text_preprocessing'](input_data=step_feature_engineering.outputs.output_data)
+    step_split_data = components['split_data'](input_data=step_feature_text_preprocessing.outputs.output_data)
+    step_feature_encoding = components['feature_encoding'](input_data_train=step_split_data.outputs.output_data_train,
                                    input_data_test=step_split_data.outputs.output_data_test)
 
-    train_model_data=train_model(train_data=step_feature_encoding.outputs.output_data_train,
+    train_model_data = components['train_model'](train_data=step_feature_encoding.outputs.output_data_train,
                                    test_data=step_feature_encoding.outputs.output_data_test,
                                    max_leaf_nodes=128,
                                    min_samples_leaf=32,
@@ -93,7 +119,7 @@ def build_pipeline(raw_data):
                                    n_estimators=100)
     # If GPU-Compute Targets are needed, use train_model.compute = "gpu-cluster"
 
-    register_model(model=train_model_data.outputs.model_output, test_report=train_model_data.outputs.test_report)
+    components['register_model'](model=train_model_data.outputs.model_output, test_report=train_model_data.outputs.test_report)
     return { "model": train_model_data.outputs.model_output,
              "report": train_model_data.outputs.test_report }
 

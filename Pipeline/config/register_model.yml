@@ -4,6 +4,8 @@ version: 1
 display_name: Register Model
 type: command
 inputs:
+  model_name:
+    type: string
   model:
     type: mlflow_model
   test_report:
@@ -12,5 +14,6 @@ environment: azureml:NLP_ML@latest
 code: ../scripts
 command: >-
   python register_model.py 
+  --model_name ${{inputs.model_name}}
   --model ${{inputs.model}} 
   --test_report ${{inputs.test_report}}

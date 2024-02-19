@@ -23,9 +23,41 @@ from sklearn.compose import make_column_transformer, make_column_selector
 from sklearn.pipeline import make_pipeline
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
-
 import mlflow
 import mlflow.sklearn
+
+MODEL_PARAMS = {
+    "naive_bayes": {
+        "alpha": 1.0,
+        "fit_prior": True,
+    },
+    "svc": {
+        "C": 1.0,
+        "kernel": "rbf",
+        "random_state": 11
+    },
+    "logistic_regression": {
+        "penalty": "l2",
+        "C": 1.0,
+        "solver": "lbfgs",
+        "max_iter": 100,
+        "random_state": 11
+    },
+    "random_forest": {
+        "n_estimators": 100,
+        "max_depth": 12,
+        "random_state": 11
+    },
+    "gradient_boosting": {
+        "max_leaf_nodes": 128,
+        "min_samples_leaf": 32,
+        "max_depth": 12,
+        "learning_rate": 0.1,
+        "n_estimators": 100,
+        "validation_fraction": 0.1,
+        "random_state": 11
+    }
+}
 
 def main(args):
     print(os.listdir(args.train_data))
@@ -56,19 +88,10 @@ def main(args):
     X_test, y_test=process_data(test_df)
 
     # train model: Gradient Boosted Decision Trees
-    params={
-        'max_leaf_nodes': args.max_leaf_nodes,
-        'min_samples_leaf': args.min_samples_leaf,
-        'max_depth': args.max_depth,
-        'learning_rate': args.learning_rate,
-        'n_estimators': args.n_estimators,
-        'validation_fraction': 0.1,
-        'random_state': 11
-        }
     
-    model, results=train_model(params, X_train, X_test, y_train, y_test)
+    model, results = train_model(args.model_name, X_train, X_test, y_train, y_test)
     
-    print('Saving model...')
+    print(f'Saving model {args.model_name}...')
     mlflow.sklearn.save_model(model, args.model_output)
     
     print('Saving evauation results...')
@@ -84,10 +107,37 @@ def process_data(df):
     # return split data
     return X, y
 
+def load_model_params(model_name):
+    if model_name not in MODEL_PARAMS:
+        raise ValueError(f"Unknown model name: {model_name}. Valid model names are: {', '.join(MODEL_PARAMS.keys())}")
 
-def train_model(params, X_train, X_test, y_train, y_test):
+    return MODEL_PARAMS[model_name]
+
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.linear_model import LogisticRegression
+
+def create_model(model_name):
+    params = load_model_params(model_name)
+    if model_name == 'naive_bayes':
+        model = MultinomialNB(**params)
+    elif model_name == 'logistic_regression':
+        model = LogisticRegression(**params)
+    elif model_name == 'gradient_boosting':
+        model = GradientBoostingClassifier(**params)
+    elif model_name == 'random_forest':
+        model = RandomForestClassifier(**params)
+    elif model_name == 'svc':
+        model = SVC(**params)
+    else:
+        raise ValueError(f"Unknown model name: {model_name}")
+
+    return model
+
+def train_model(model_name, X_train, X_test, y_train, y_test):
     # train model
-    model=GradientBoostingClassifier(**params)
+    model = create_model(model_name)
     model=model.fit(X_train, y_train)
     
     y_preds=model.predict(X_test)
@@ -103,11 +153,7 @@ def parse_args():
     parser=argparse.ArgumentParser()
     parser.add_argument("--train_data", type=str, help="Path of prepped train data")
     parser.add_argument("--test_data", type=str, help="Path of prepped test data")
-    parser.add_argument('--max_leaf_nodes', type=int)
-    parser.add_argument('--min_samples_leaf', type=int)
-    parser.add_argument('--max_depth', type=int)
-    parser.add_argument('--learning_rate', type=float)
-    parser.add_argument('--n_estimators', type=int)
+    parser.add_argument('--model_name', type=str, help="Name of model to train")
     parser.add_argument("--model_output", type=str, help="Path of output model")
     parser.add_argument("--test_report", type=str, help="Path of test_report")
 

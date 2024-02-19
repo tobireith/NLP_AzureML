@@ -12,12 +12,14 @@ print("Register model...")
 mlflow.start_run()
 
 parser=argparse.ArgumentParser("register")
+parser.add_argument("--model_name", type=str, help="Name of the trained model")
 parser.add_argument("--model", type=str, help="Path to trained model")
 parser.add_argument("--test_report", type=str, help="Path of model's test report")
 
 args=parser.parse_args()
 
 lines=[
+    f"Model name: {args.model_name}",
     f"Model path: {args.model}",
     f"Test report path: {args.test_report}",
 ]
@@ -42,8 +44,8 @@ os.makedirs(root_model_path, exist_ok=True)
 mlflow.sklearn.save_model(model, root_model_path)
 
 print("Registering the models...")
-registered_model_name="AmazonFineFoodScoreBoostedTree"
-model_description="Amazon Fine Food Reviews Score Boosted Tree Predictor"
+registered_model_name = f"AmazonFineFoodScore_{args.model_name}"
+model_description=f"Amazon Fine Food Reviews Score {args.model_name} Predictor"
 
 registered_model=Model.register(model_path=root_model_path, 
                                   model_name=registered_model_name, 

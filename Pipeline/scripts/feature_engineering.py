@@ -43,9 +43,21 @@ df=pd.concat(file_list)
 # Remove missing values
 df.dropna(inplace=True)
 
+# Map Score to Sentiment
+def map_score_to_sentiment(score):
+  match score:
+    case 1 | 2: # Negaitve
+      return -1
+    case 3: # Neutral
+      return 0
+    case 4 | 5: # Positive
+      return 1
+     
+df['Sentiment'] = df['Score'].apply(map_score_to_sentiment)
+
 # Feature Selection
-# Drop all other features than 'Score' and 'Text'
-df.drop(['Id', 'ProductId', 'UserId', 'ProfileName', 'HelpfulnessNumerator', 'HelpfulnessDenominator', 'Time', 'Summary'], axis=1, inplace=True)
+# Drop all other features than 'Sentiment' and 'Text'
+df.drop(['Id', 'ProductId', 'UserId', 'ProfileName', 'HelpfulnessNumerator', 'HelpfulnessDenominator', 'Time', 'Score', 'Summary'], axis=1, inplace=True)
 
 # Write the results out for the next step.
 print("Writing results out...")

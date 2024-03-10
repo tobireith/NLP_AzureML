@@ -15,7 +15,7 @@ def update_component(component_name, component_version=None):
         print(f"Component {component_name} not found.")
         
     # Define the component file path
-    component_file_path = f'./config/{component_name}.yml'
+    component_file_path = f'./components/{component_name}/{component_name}.yml'
 
     # Create or update the component
     component = ml_client.components.create_or_update(load_component(component_file_path), version=component_version)

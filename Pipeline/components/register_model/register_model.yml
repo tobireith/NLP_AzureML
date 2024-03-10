@@ -11,7 +11,7 @@ inputs:
   test_report:
     type: uri_folder
 environment: azureml:NLP_ML@latest
-code: ../scripts
+code: .
 command: >-
   python register_model.py 
   --model_name ${{inputs.model_name}}

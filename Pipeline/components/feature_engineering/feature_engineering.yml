@@ -9,7 +9,7 @@ inputs:
 outputs:
   output_data:
     type: uri_folder
-code: ../scripts
+code: .
 environment: azureml:NLP_ML@latest
 command: >-
   python feature_engineering.py 

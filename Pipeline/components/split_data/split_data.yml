@@ -1,23 +1,20 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
-name: feature_encoding
-display_name: Feature Encoding
+name: split_data
+display_name: Split Data
 version: 1
 type: command
 inputs:
-  input_data_train: 
-    type: uri_folder
-  input_data_test: 
+  input_data:
     type: uri_folder
 outputs:
   output_data_train:
     type: uri_folder
   output_data_test:
     type: uri_folder
-code: ../scripts
+code: .
 environment: azureml:NLP_ML@latest
 command: >-
-  python feature_encoding.py 
-  --input_data_train ${{inputs.input_data_train}}
-  --input_data_test ${{inputs.input_data_test}}
+  python split_data.py 
+  --input_data ${{inputs.input_data}}
   --output_data_train ${{outputs.output_data_train}}
   --output_data_test ${{outputs.output_data_test}}

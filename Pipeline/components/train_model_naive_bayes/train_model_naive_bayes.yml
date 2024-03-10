@@ -13,7 +13,7 @@ outputs:
     type: mlflow_model
   test_report:
     type: uri_folder
-code: ../scripts
+code: .
 environment: azureml:NLP_ML@latest
 command: >-
   python train_model_naive_bayes.py 

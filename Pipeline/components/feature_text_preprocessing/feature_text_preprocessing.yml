@@ -1,20 +1,17 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
-name: split_data
-display_name: Split Data
+name: feature_text_preprocessing
+display_name: Text Preprocessing
 version: 1
 type: command
 inputs:
   input_data:
     type: uri_folder
 outputs:
-  output_data_train:
+  output_data:
     type: uri_folder
-  output_data_test:
-    type: uri_folder
-code: ../scripts
+code: .
 environment: azureml:NLP_ML@latest
 command: >-
-  python split_data.py 
+  python feature_text_preprocessing.py 
   --input_data ${{inputs.input_data}}
-  --output_data_train ${{outputs.output_data_train}}
-  --output_data_test ${{outputs.output_data_test}}
+  --output_data ${{outputs.output_data}}

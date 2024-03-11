@@ -8,8 +8,8 @@ import mlflow.sklearn
 import sys
 import timeit
 import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
-
+from gensim.models.doc2vec import TaggedDocument
+from gensim.models.doc2vec import Doc2Vec
 
 parser=argparse.ArgumentParser("prep")
 parser.add_argument("--input_data_train", type=str, help="Name of the folder containing input train data for this operation")
@@ -46,39 +46,45 @@ for filename in os.listdir(args.input_data_test):
 test_df=pd.concat(test_file_list)
 
 
-label_column='Score'
+label_column='Sentiment'
 def X_y_split(df):
     X=df.drop(label_column, axis=1)
     y=df[label_column]
-
-    # return split data
     return X, y
 
 X_train, y_train = X_y_split(train_df)
 X_test, y_test = X_y_split(test_df)
 
-# Feature Encoding steps
+# Feature Encoding for Text-Data using Doc2Vec
 
-# Set the parameters for TF-IDF Vectorization
-MAX_FEATURES = 1000
-MIN_DF = 0.01
-MAX_DF = 0.99
-NGRAM_RANGE = (1,3)
+# The Doc2Vec-Model needs tagged data and the tagger data needs to be a list of words.
+X_train_tokens = X_train.apply(lambda x: x.split())
+X_test_tokens = X_test.apply(lambda x: x.split())
 
-# Create the TF-IDF-Vectorizer
-# Limit the features by using min and max df.
-vectorizer_tfidf = TfidfVectorizer(max_features=MAX_FEATURES, min_df=MIN_DF, max_df=MAX_DF)
+# Creation of TaggedDocument-Objects in order to tag the training-data for training the Doc2Vec Model
+# Test-Data does not need to be tagged!
+tagged_train_data = [TaggedDocument(words=words, tags=[f'train_{i}']) for i, words in enumerate(X_train_tokens)]
 
-# Use fit_transform on the training data
-X_train_transformed = vectorizer_tfidf.fit_transform(X_train['Text'])
-# transform the test data by using the Vectorizer
-X_test_transformed = vectorizer_tfidf.transform(X_test['Text'])
+# Define and train the model
+doc2vec_model = Doc2Vec(vector_size=100, window=5, min_count=2, workers=4, epochs=10)
+doc2vec_model.build_vocab(tagged_train_data)
+doc2vec_model.train(tagged_train_data, total_examples=doc2vec_model.corpus_count, epochs=doc2vec_model.epochs)
+
+vocab_size = len(doc2vec_model.wv.key_to_index)
+print(f"Size of vocabulary: {vocab_size}")
+
+# Transform the training data by using the Doc2Vec-Model
+X_train_doc2vec = np.array([doc2vec_model.dv[f'train_{i}'] for i in range(len(X_train_tokens))])
+# Transform the test data by using the Doc2Vec-Model
+X_test_doc2vec = np.array([doc2vec_model.infer_vector(doc) for doc in X_test_tokens])
+
+# Each Review is now represented by a 100-dimensional vector
 
 # Converting the transformed Training- and Testdata into DataFrames
-train_df_transformed = pd.DataFrame(X_train_transformed.toarray(), columns=vectorizer_tfidf.get_feature_names_out())
-test_df_transformed = pd.DataFrame(X_test_transformed.toarray(), columns=vectorizer_tfidf.get_feature_names_out())
+train_df_transformed = pd.DataFrame(X_train_doc2vec, columns=[f"Doc2Vec_{i}" for i in range(100)])
+test_df_transformed = pd.DataFrame(X_test_doc2vec, columns=[f"Doc2Vec_{i}" for i in range(100)])
 
-# Adding the Labels to the DataFrames
+# Adding y-Column to the DataFrames
 train_df_transformed[label_column] = y_train.reset_index(drop=True)
 test_df_transformed[label_column] = y_test.reset_index(drop=True)
 

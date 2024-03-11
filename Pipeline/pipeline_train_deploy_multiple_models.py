@@ -31,7 +31,7 @@ COMPONENT_NAMES_AND_PATHS = {
     "feature_engineering": "feature_engineering/feature_engineering.yml",
     "feature_text_preprocessing": "feature_text_preprocessing/feature_text_preprocessing.yml",
     "split_data": "split_data/split_data.yml",
-    "feature_encoding": "feature_encoding/feature_encoding.yml",
+    "feature_encoding_doc2vec": "feature_encoding_doc2vec/feature_encoding_doc2vec.yml",
     "train_model_logistic_regression": "train_model_logistic_regression/train_model_logistic_regression.yml",
     "train_model_naive_bayes": "train_model_naive_bayes/train_model_naive_bayes.yml",
     "register_model": "register_model/register_model.yml"

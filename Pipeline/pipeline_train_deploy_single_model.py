@@ -30,8 +30,8 @@ COMPONENT_NAMES_AND_PATHS = {
     "feature_engineering": "feature_engineering/feature_engineering.yml",
     "feature_text_preprocessing": "feature_text_preprocessing/feature_text_preprocessing.yml",
     "split_data": "split_data/split_data.yml",
-    "feature_encoding": "feature_encoding/feature_encoding.yml",
-    "train_model_params": "train_model/train_model_params.yml",
+    "feature_encoding_doc2vec": "feature_encoding_doc2vec/feature_encoding_doc2vec.yml",
+    "train_model_params": "train_model_params/train_model_params.yml",
     "register_model": "register_model/register_model.yml"
 }
 

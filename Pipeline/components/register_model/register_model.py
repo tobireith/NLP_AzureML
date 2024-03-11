@@ -44,8 +44,8 @@ os.makedirs(root_model_path, exist_ok=True)
 mlflow.sklearn.save_model(model, root_model_path)
 
 print("Registering the models...")
-registered_model_name = f"AmazonFineFoodScore_{args.model_name}"
-model_description=f"Amazon Fine Food Reviews Score {args.model_name} Predictor"
+registered_model_name = f"AmazonFineFoodSentiment_{args.model_name}"
+model_description=f"Amazon Fine Food Reviews Sentiment {args.model_name} Predictor"
 
 registered_model=Model.register(model_path=root_model_path, 
                                   model_name=registered_model_name, 

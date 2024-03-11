@@ -99,7 +99,7 @@ def main(args):
         json.dump(results, fp)
     
 def process_data(df):
-    label_column="Score"
+    label_column="Sentiment"
         
     X=df.drop(label_column, axis=1)
     y=df[label_column]

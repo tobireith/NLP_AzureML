@@ -11,7 +11,7 @@ def init():
     print('Loading models...')
     run = Run.get_context()
     ws = run.experiment.workspace
-    model_name = "AmazonFineFoodScoreBoostedTree"
+    model_name = "AmazonFineFoodSentimentBoostedTree"
     model_path = Model.get_model_path(model_name=model_name, _workspace=ws)
     # Load the model, it's input types and output names
     model = mlflow.sklearn.load_model(model_path)
@@ -26,5 +26,5 @@ def run(mini_batch):
     )
 
     pred = model.predict(data)
-    pred = pd.DataFrame(pred, columns=['Score'])
-    return data.assign(Score=pred['Score'])
+    pred = pd.DataFrame(pred, columns=['Sentiment'])
+    return data.assign(Score=pred['Sentiment'])

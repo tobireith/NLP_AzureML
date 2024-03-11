@@ -71,7 +71,7 @@ def main(args):
         json.dump(results, fp)
     
 def extract_target_feature(df):
-    label_column="Score"
+    label_column="Sentiment"
         
     X=df.drop(label_column, axis=1)
     y=df[label_column]

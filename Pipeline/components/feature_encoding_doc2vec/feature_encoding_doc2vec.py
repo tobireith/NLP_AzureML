@@ -10,6 +10,9 @@ import timeit
 import numpy as np
 from gensim.models.doc2vec import TaggedDocument
 from gensim.models.doc2vec import Doc2Vec
+import logging
+
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 parser=argparse.ArgumentParser("prep")
 parser.add_argument("--input_data_train", type=str, help="Name of the folder containing input train data for this operation")
@@ -58,8 +61,8 @@ X_test, y_test = X_y_split(test_df)
 # Feature Encoding for Text-Data using Doc2Vec
 
 # The Doc2Vec-Model needs tagged data and the tagger data needs to be a list of words.
-X_train_tokens = X_train.apply(lambda x: x.split())
-X_test_tokens = X_test.apply(lambda x: x.split())
+X_train_tokens = X_train['Text'].apply(lambda x: str(x).split())
+X_test_tokens = X_test['Text'].apply(lambda x: str(x).split())
 
 # Creation of TaggedDocument-Objects in order to tag the training-data for training the Doc2Vec Model
 # Test-Data does not need to be tagged!

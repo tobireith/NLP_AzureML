@@ -25,13 +25,16 @@ from azure.ai.ml.sweep import (
 
 # Constants and global variables
 WORKSPACE_NAME = "treithmaier-amls-01"
-COMPUTE_NAME = "treithmaier-vm01"
+COMPUTE_NAME = "treithmaier-cpu-cc01"
 PARENT_DIR = "./components/"
 COMPONENT_NAMES_AND_PATHS = {
     "feature_engineering": "feature_engineering/feature_engineering.yml",
     "feature_text_preprocessing": "feature_text_preprocessing/feature_text_preprocessing.yml",
     "split_data": "split_data/split_data.yml",
     "feature_encoding_doc2vec": "feature_encoding_doc2vec/feature_encoding_doc2vec.yml",
+    "train_model_xgboost": "train_model_xgboost/train_model_xgboost.yml",
+    "train_model_random_forest": "train_model_random_forest/train_model_random_forest.yml",
+    "train_model_svc": "train_model_svc/train_model_svc.yml",
     "train_model_logistic_regression": "train_model_logistic_regression/train_model_logistic_regression.yml",
     "train_model_naive_bayes": "train_model_naive_bayes/train_model_naive_bayes.yml",
     "register_model": "register_model/register_model.yml"
@@ -110,19 +113,19 @@ def build_pipeline(raw_data):
     step_split_data = components['split_data'](
         input_data=step_feature_text_preprocessing.outputs.output_data
     )
-    # Step 4: Feature Encoding
-    step_feature_encoding = components['feature_encoding'](
+    # Step 4: Feature Encoding using Doc2Vec
+    step_feature_encoding_doc2vec = components['feature_encoding_doc2vec'](
         input_data_train=step_split_data.outputs.output_data_train,
         input_data_test=step_split_data.outputs.output_data_test
     )
 
     # Step 5: Train and register multiple models in parallel
-    for model_name in ["logistic_regression", "naive_bayes"]:
+    for model_name in ["logistic_regression", "naive_bayes", "random_forest", "svc", "xgboost"]:
         model_name = f"train_model_{model_name}"
         # If GPU-Compute Targets are needed, use train_model.compute = "gpu-cluster"
         train_model_components[model_name] = load_component_train_model(
             model_name, 
-            step_feature_encoding, 
+            step_feature_encoding_doc2vec, 
             components
         )
         load_component_register_model(

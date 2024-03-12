@@ -78,11 +78,11 @@ def build_pipeline(raw_data, model_name="random_forest"):
     step_feature_engineering = components['feature_engineering'](input_data=raw_data)
     step_feature_text_preprocessing = components['feature_text_preprocessing'](input_data=step_feature_engineering.outputs.output_data)
     step_split_data = components['split_data'](input_data=step_feature_text_preprocessing.outputs.output_data)
-    step_feature_encoding = components['feature_encoding'](input_data_train=step_split_data.outputs.output_data_train,
+    step_feature_encoding_doc2vec = components['feature_encoding_doc2vec'](input_data_train=step_split_data.outputs.output_data_train,
                                    input_data_test=step_split_data.outputs.output_data_test)
 
-    train_model_data = components['train_model'](train_data=step_feature_encoding.outputs.output_data_train,
-                                   test_data=step_feature_encoding.outputs.output_data_test,
+    train_model_data = components['train_model_params'](train_data=step_feature_encoding_doc2vec.outputs.output_data_train,
+                                   test_data=step_feature_encoding_doc2vec.outputs.output_data_test,
                                    model_name=model_name)
     # If GPU-Compute Targets are needed, use train_model.compute = "gpu-cluster"
 

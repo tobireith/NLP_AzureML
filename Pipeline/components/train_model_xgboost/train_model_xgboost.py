@@ -11,8 +11,13 @@ from sklearn.metrics import classification_report
 import mlflow
 import mlflow.sklearn
 
+import logging
+
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+
 MODEL_PARAMS = {
-    "random_state": 11
+    "random_state": 11,
+    "use_label_encoder": False
 }
 
 def main(args):

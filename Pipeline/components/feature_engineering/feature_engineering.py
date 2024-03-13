@@ -47,11 +47,11 @@ df.dropna(inplace=True)
 def map_score_to_sentiment(score):
   match score:
     case 1 | 2: # Negaitve
-      return -1
-    case 3: # Neutral
       return 0
-    case 4 | 5: # Positive
+    case 3: # Neutral
       return 1
+    case 4 | 5: # Positive
+      return 2
      
 df['Sentiment'] = df['Score'].apply(map_score_to_sentiment)
 

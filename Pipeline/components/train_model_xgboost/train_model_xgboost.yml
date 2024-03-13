@@ -16,7 +16,7 @@ outputs:
 code: .
 environment: azureml:NLP_ML@latest
 command: >-
-  python train_model_xboost.py 
+  python train_model_xgboost.py 
   --train_data ${{inputs.train_data}}
   --test_data ${{inputs.train_data}}
   --model_output ${{outputs.model_output}}

@@ -12,6 +12,10 @@ import mlflow
 import mlflow.sklearn
 
 MODEL_PARAMS = {
+    "n_estimators": 100,
+    "max_depth": None,
+    "min_samples_split": 2,
+    "bootstrap": True,
     "random_state": 11
 }
 

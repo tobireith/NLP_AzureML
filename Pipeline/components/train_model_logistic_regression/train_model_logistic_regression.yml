@@ -18,6 +18,6 @@ environment: azureml:NLP_ML@latest
 command: >-
   python train_model_logistic_regression.py 
   --train_data ${{inputs.train_data}}
-  --test_data ${{inputs.train_data}}
+  --test_data ${{inputs.test_data}}
   --model_output ${{outputs.model_output}}
   --test_report ${{outputs.test_report}}

@@ -20,7 +20,7 @@ environment: azureml:NLP_ML@latest
 command: >-
   python train_model_params.py 
   --train_data ${{inputs.train_data}}
-  --test_data ${{inputs.train_data}}
+  --test_data ${{inputs.test_data}}
   --model_name ${{inputs.model_name}}
   --model_output ${{outputs.model_output}}
   --test_report ${{outputs.test_report}}

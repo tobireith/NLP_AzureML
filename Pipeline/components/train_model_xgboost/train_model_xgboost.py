@@ -16,6 +16,9 @@ import logging
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 MODEL_PARAMS = {
+    "learning_rate": 0.1,
+    "n_estimators": 100,
+    "booster": "gbtree",
     "random_state": 11,
     "use_label_encoder": False
 }

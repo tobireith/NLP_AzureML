@@ -1,27 +1,10 @@
 import argparse
 from pathlib import Path
-from uuid import uuid4
-from datetime import datetime
 import os
-import time
 import json
-import pickle
-import sys
 import numpy as np
 import pandas as pd
-import urllib
-from math import sqrt
-
-import sklearn.ensemble
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.pipeline import Pipeline
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder, MinMaxScaler
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.base import clone
-from sklearn.compose import make_column_transformer, make_column_selector
-from sklearn.pipeline import make_pipeline
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.metrics import classification_report
 
 import mlflow
 import mlflow.sklearn

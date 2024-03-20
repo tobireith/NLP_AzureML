@@ -11,7 +11,13 @@ from sklearn.svm import SVC
 import mlflow
 import mlflow.sklearn
 
+import logging
+
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+
 MODEL_PARAMS = {
+    "max_iter": 100,
+    "class_weight": "balanced",
     "random_state": 11
 }
 
@@ -63,6 +69,7 @@ def extract_target_feature(df):
 
 def train_model(X_train, X_test, y_train, y_test):
     print(f'Starting training of model SVC...')
+    print("Model parameters: ", MODEL_PARAMS)
     # train model
     model = SVC(**MODEL_PARAMS)
     model=model.fit(X_train, y_train)

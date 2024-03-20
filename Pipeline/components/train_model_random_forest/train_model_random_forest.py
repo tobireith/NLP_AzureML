@@ -11,11 +11,16 @@ from sklearn.ensemble import RandomForestClassifier
 import mlflow
 import mlflow.sklearn
 
+import logging
+
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+
 MODEL_PARAMS = {
     "n_estimators": 100,
     "max_depth": None,
     "min_samples_split": 2,
     "bootstrap": True,
+    "class_weight": "balanced",
     "random_state": 11
 }
 
@@ -67,6 +72,7 @@ def extract_target_feature(df):
 
 def train_model(X_train, X_test, y_train, y_test):
     print(f'Starting training of model Random Forest...')
+    print("Model parameters: ", MODEL_PARAMS)
     # train model
     model = RandomForestClassifier(**MODEL_PARAMS)
     model=model.fit(X_train, y_train)

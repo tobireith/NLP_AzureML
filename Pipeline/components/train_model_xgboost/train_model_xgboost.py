@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from xgboost import XGBClassifier
+from sklearn.utils.class_weight import compute_sample_weight
 from sklearn.metrics import classification_report
 
 import mlflow
@@ -71,9 +72,18 @@ def extract_target_feature(df):
 
 def train_model(X_train, X_test, y_train, y_test):
     print(f'Starting training of model XBoost...')
+    print("Model parameters: ", MODEL_PARAMS)
     # train model
     model = XGBClassifier(**MODEL_PARAMS)
-    model=model.fit(X_train, y_train)
+
+    balanced_class_weights = compute_sample_weight(
+        class_weight='balanced',
+        y=y_train
+    )
+
+    print(f"Balanced class weights: {balanced_class_weights}")
+
+    model=model.fit(X_train, y_train, sample_weight=balanced_class_weights)
     
     print(f'Training of model XBoost finished, starting evaluation...')
     y_preds=model.predict(X_test)

@@ -12,6 +12,10 @@ import mlflow.sklearn
 
 from sklearn.naive_bayes import MultinomialNB
 
+import logging
+
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+
 MODEL_PARAMS = {
     "alpha": 1.0,
     "fit_prior": True,

@@ -11,11 +11,16 @@ import mlflow.sklearn
 
 from sklearn.linear_model import LogisticRegression
 
+import logging
+
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+
 MODEL_PARAMS = {
     "penalty": "l2",
     "C": 1.0,
     "solver": "lbfgs",
     "max_iter": 100,
+    "class_weight": "balanced",
     "random_state": 11
 }
 
@@ -68,6 +73,7 @@ def extract_target_feature(df):
 def train_model(X_train, X_test, y_train, y_test):
     # train model
     model = LogisticRegression(**MODEL_PARAMS)
+    print("Model parameters: ", MODEL_PARAMS)
     model=model.fit(X_train, y_train)
     
     y_preds=model.predict(X_test)

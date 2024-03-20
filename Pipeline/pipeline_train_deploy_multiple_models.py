@@ -72,8 +72,10 @@ def get_components():
     # So that you can use `components` to access the registered components,
     # e.g., `components['feature_engineering']` instead of `load_component(...)`.
     for name, file_path in COMPONENT_NAMES_AND_PATHS.items():
+        print(f"Loading Component {name}...")
         full_path = os.path.join(PARENT_DIR, file_path)
-        components[name] = get_or_register_component(name, full_path)
+        # components[name] = get_or_register_component(name, full_path)
+        components[name] = load_component(full_path)
     return components
 
 # Load a train_model component
@@ -95,7 +97,7 @@ def load_component_register_model(component, model_name, train_model_data):
 
 # Build the Pipeline with all the components
 @pipeline(
-        name="train_pipeline_for_multiple_models", 
+        name="train_pipeline_for_multiple_models_balanced", 
         description="Build a training pipeline to train multiple models"
 )
 def build_pipeline(raw_data):
@@ -120,7 +122,7 @@ def build_pipeline(raw_data):
     )
 
     # Step 5: Train and register multiple models in parallel
-    for model_name in ["logistic_regression", "naive_bayes", "random_forest", "svc", "xgboost"]:
+    for model_name in ["logistic_regression", "random_forest", "svc", "xgboost"]:
         model_name = f"train_model_{model_name}"
         # If GPU-Compute Targets are needed, use train_model.compute = "gpu-cluster"
         train_model_components[model_name] = load_component_train_model(

@@ -76,19 +76,27 @@ def train_model(X_train, X_test, y_train, y_test):
     # train model
     model = XGBClassifier(**MODEL_PARAMS)
 
-    balanced_class_weights = compute_sample_weight(
-        class_weight='balanced',
-        y=y_train
-    )
-
-    print(f"Balanced class weights: {balanced_class_weights}")
-
-    model=model.fit(X_train, y_train, sample_weight=balanced_class_weights)
+    model=model.fit(X_train, y_train)
     
     print(f'Training of model XBoost finished, starting evaluation...')
     y_preds=model.predict(X_test)
 
     results = classification_report(y_test, y_preds, output_dict=True)
+
+    # Log metrics in mlflow
+    mlflow.log_param("model", "SVC")
+    for label, metrics in results.items():
+        if label == "accuracy":
+            mlflow.log_metric(label, metrics)
+        else:
+            for metric_name, metric_value in metrics.items():
+                if isinstance(metric_value, (int, float)):
+                    mlflow.log_metric(f"{label}_{metric_name}", metric_value)
+    
+    # Log model parameters in mlflow
+    # Log parameters
+    for param, value in MODEL_PARAMS.items():
+        mlflow.log_param(param, value)
     
     print(results)
 

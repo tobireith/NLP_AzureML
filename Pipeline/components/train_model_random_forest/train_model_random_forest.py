@@ -8,8 +8,22 @@ import pandas as pd
 from sklearn.metrics import classification_report
 from sklearn.ensemble import RandomForestClassifier
 
+import matplotlib.pyplot as plt
+import seaborn as sns
 import mlflow
 import mlflow.sklearn
+
+mlflow.sklearn.autolog()
+
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_auc_score,
+    confusion_matrix,
+)
+
 
 import logging
 
@@ -98,6 +112,20 @@ def train_model(X_train, X_test, y_train, y_test):
         mlflow.log_param(param, value)
     
     print(results)
+
+    # Confusion Matrix
+    sns.set()
+    print("Confusion Matrix:")
+    plt.figure(figsize=(5,3))
+    sns.heatmap(confusion_matrix(y_test, y_preds), annot=True, fmt='d', cmap='Blues')
+    plt.title('Confusion Matrix')
+
+    # Save Confusion Matrix as image
+    confusion_matrix_image_path = "confusion_matrix.png"
+    plt.savefig(confusion_matrix_image_path)
+    plt.close()
+
+    print("Done")
 
     # return model
     return model, results
